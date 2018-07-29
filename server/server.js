@@ -26,8 +26,22 @@ app.post('/checklists', (req,res) => {
                 res.send(doc);
         }, 
             (e) => {
-                    //on saving failed send the error message with a status of 400 in the POST response
+                //on saving failed send the error message with a status of 400 in the POST response
                 res.status(400).send(e);
+    })
+});
+
+//GET method endpoint to fetch all the checklists
+app.get('/checklists', (req,res) => {
+    //fetch all the checklists from the database
+    Checklist.find().then(
+        (checklists) => {
+            //send the fetched checklists as a response
+            res.send({checklists});
+        },
+        (e) => {
+            //on fetch failed send the error message with a status of 400 in the GET response
+            res.status(400).send(e);
     })
 });
 
