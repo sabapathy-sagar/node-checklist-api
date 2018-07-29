@@ -2,20 +2,20 @@ const expect = require('expect');
 const request = require('supertest');
 
 const {app} = require('./../server');
-const {Todo} = require('./../models/todo');
+const {Checklist} = require('./../models/checklist');
 
-describe('POST /todos', () => {
+describe('POST /checklists', () => {
 
     //clear the database before running any tests
     beforeEach((done) => {
-        Todo.remove({}).then(() => done());
+        Checklist.remove({}).then(() => done());
     })
 
-    it('should create a new todo', (done) => {
-        const text = "dummy todo";
+    it('should create a new checklist', (done) => {
+        const text = "dummy checklist";
 
         request(app)
-            .post('/todos')
+            .post('/checklists')
             .send({text})
             .expect(200)
             .expect((res) => {
@@ -26,27 +26,27 @@ describe('POST /todos', () => {
                     return done(err);
                 }
 
-                Todo.find().then((todos) => {
-                    expect(todos.length).toBe(1);
-                    expect(todos[0].text).toBe(text);
+                Checklist.find().then((checklists) => {
+                    expect(checklists.length).toBe(1);
+                    expect(checklists[0].text).toBe(text);
                     done();
                 }).catch((e) => done(e));
             })
     });
 
-    it('should not create a todo with invalid body data', (done) => {
+    it('should not create a checklist with invalid body data', (done) => {
         const text = null;
 
         request(app)
-            .post('/todos')
+            .post('/checklists')
             .send({text})
             .expect(400)
             .end((err,res) => {
                 if(err){
                     return done(err);
                 }
-                Todo.find().then((todos) => {
-                    expect(todos.length).toBe(0);
+                Checklist.find().then((checklists) => {
+                    expect(checklists.length).toBe(0);
                     done();
                 }).catch((e) => done(e));
             })

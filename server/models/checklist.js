@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 //set up the schema for Todo
-const Todo = mongoose.model('Todo', {
+const Checklist = mongoose.model('Checklist', {
     text: {
         type: String,
         required: true,
@@ -18,4 +18,4 @@ const Todo = mongoose.model('Todo', {
     }
 });
 
-module.exports = {Todo};
+module.exports = {Checklist};

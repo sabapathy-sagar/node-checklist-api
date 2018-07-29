@@ -1,7 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('./db/mongoose');
-const {Todo} = require('./models/todo');
+const {Checklist} = require('./models/checklist');
 const {User} = require('./models/user');
 
 //create an express application
@@ -10,19 +10,19 @@ const app = express();
 //middleware to use json format for http request body
 app.use(bodyParser.json());
 
-//POST method endpoint for creating todos
-app.post('/todos', (req,res) => {
+//POST method endpoint for creating checklists
+app.post('/checklists', (req,res) => {
 
-    //a mongoose todo instance to set the text data of the todo
-    const todo = new Todo({
+    //a mongoose todo instance to set the text data of the checklist
+    const checklist = new Checklist({
         text: req.body.text
     });
 
     //save the text data to mongodb
-    todo.save()
+    checklist.save()
         .then(
             (doc) => {
-                //on saving success send the saved todo in the POST  response 
+                //on saving success send the saved checklist in the POST  response 
                 res.send(doc);
         }, 
             (e) => {
