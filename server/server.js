@@ -18,7 +18,7 @@ app.post('/checklists', (req,res) => {
         text: req.body.text
     });
 
-    //save the text data to mongodb
+    //save the checklist text data to mongodb
     checklist.save()
         .then(
             (doc) => {
