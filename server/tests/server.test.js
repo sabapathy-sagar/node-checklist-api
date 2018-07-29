@@ -12,7 +12,8 @@ const mockChecklists = [
     },
     {
         _id: new ObjectID(),
-        text: "sec checklist"
+        text: "sec checklist",
+        completed: false
     }
 ]
 
@@ -150,3 +151,30 @@ describe('DELETE /checklists/id', () => {
             .end(done)
     });
 });
+
+describe('PATCH /checklists/id', () => {
+    it('should update the checklist', (done) => {
+
+        request(app)
+            .patch(`/checklists/${mockChecklists[1]._id.toHexString()}`)
+            .send({completed: true})
+            .expect(200)
+            .expect((res) => {
+                expect(res.body.checklist.completed).toBe(true);
+            })
+            .end(done)
+    })
+
+    it('should clear completedAt when checklist is not completed', (done) => {
+
+        request(app)
+            .patch(`/checklists/${mockChecklists[1]._id.toHexString()}`)
+            .send({completed: false})
+            .expect(200)
+            .expect((res) => {
+                expect(res.body.checklist.completedAt).toBe(null);
+            })
+            .end(done)
+    })
+
+})
