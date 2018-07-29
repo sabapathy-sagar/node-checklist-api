@@ -4,12 +4,24 @@ const request = require('supertest');
 const {app} = require('./../server');
 const {Checklist} = require('./../models/checklist');
 
-describe('POST /checklists', () => {
+const mockChecklists = [
+    {
+        text: "first checklist"
+    },
+    {
+        text: "sec checklist"
+    }
+]
 
-    //clear the database before running any tests
-    beforeEach((done) => {
-        Checklist.remove({}).then(() => done());
-    })
+//clear the database and insert the mock checklists before running any tests
+beforeEach((done) => {
+    Checklist.remove().then(() => {
+        Checklist.insertMany(mockChecklists)
+            .then(() => done())
+    });
+})
+
+describe('POST /checklists', () => {
 
     it('should create a new checklist', (done) => {
         const text = "dummy checklist";
@@ -26,7 +38,7 @@ describe('POST /checklists', () => {
                     return done(err);
                 }
 
-                Checklist.find().then((checklists) => {
+                Checklist.find({text}).then((checklists) => {
                     expect(checklists.length).toBe(1);
                     expect(checklists[0].text).toBe(text);
                     done();
@@ -46,9 +58,23 @@ describe('POST /checklists', () => {
                     return done(err);
                 }
                 Checklist.find().then((checklists) => {
-                    expect(checklists.length).toBe(0);
+                    expect(checklists.length).toBe(2);
                     done();
                 }).catch((e) => done(e));
             })
+    });
+});
+
+describe('GET /checklists', () => {
+
+    it('should fetch all the checklists from the db', (done) => {
+
+        request(app)
+            .get('/checklists')
+            .expect(200)
+            .expect((res) => {
+                expect(res.body.checklists.length).toBe(2);
+            })
+            .end(done)
     });
 });
