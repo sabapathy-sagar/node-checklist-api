@@ -111,3 +111,33 @@ describe('GET /checklists/id', () => {
             .end(done)
     });
 });
+
+describe('DELETE /checklists/id', () => {
+
+    it('should delete the checklist for the given id', (done) => {
+
+        request(app)
+            .delete(`/checklists/${mockChecklists[0]._id.toHexString()}`)
+            .expect(200)
+            .expect((res) => {
+                expect(res.body.checklist.text).toBe(mockChecklists[0].text);
+            })
+            .end(done)
+    });
+
+    it('should return a 404 if checklist not found', (done) => {
+
+        request(app)
+            .get(`/checklists/${new ObjectID().toHexString()}`)
+            .expect(404)
+            .end(done)
+    });
+
+    it('should return a 404 if the given id is not a valid ObjectID', (done) => {
+
+        request(app)
+            .get('/checklists/123')
+            .expect(404)
+            .end(done)
+    });
+});
