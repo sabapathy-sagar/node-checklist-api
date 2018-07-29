@@ -1,5 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const _ = require('lodash');
 const {ObjectID} = require('mongodb');
 const mongoose = require('./db/mongoose');
 const {Checklist} = require('./models/checklist');
@@ -98,6 +99,41 @@ app.delete('/checklists/:id', (req,res) => {
             res.status(400).send();
         }))
 
+});
+
+//PATCH method endpoint to update a checklist based on the id provided
+app.patch('/checklists/:id', (req,res) => {
+    const id = req.params.id;
+
+    //grab the text and completed attributes from the request body
+    const body = _.pick(req.body, ['text', 'completed']);
+
+    //validate the id provided, if invalid send 404 Bad request
+    if(!ObjectID.isValid(id)){
+        res.status(404).send();
+        return;
+    }
+
+    //set the completedAt property by checking the completed property
+    if(_.isBoolean(body.completed) && body.completed){
+        body.completedAt = new Date().getTime();
+    } else {
+        completed = false;
+        completedAt = null;
+    }  
+
+    //update the checklist with the new values
+    Checklist.findByIdAndUpdate(id, {$set: body}, {new: true})
+        .then((checklist) => {
+            if(!checklist){
+                return res.status(404).send();
+            }
+
+            res.send({checklist});
+        })
+        .catch((e) => {
+            res.status(400).send();
+        });
 });
 
 //listen on port 3000
