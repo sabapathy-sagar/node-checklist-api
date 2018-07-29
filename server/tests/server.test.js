@@ -1,14 +1,17 @@
 const expect = require('expect');
 const request = require('supertest');
+const {ObjectID} = require('mongodb');
 
 const {app} = require('./../server');
 const {Checklist} = require('./../models/checklist');
 
 const mockChecklists = [
     {
+        _id: new ObjectID(),
         text: "first checklist"
     },
     {
+        _id: new ObjectID(),
         text: "sec checklist"
     }
 ]
@@ -75,6 +78,36 @@ describe('GET /checklists', () => {
             .expect((res) => {
                 expect(res.body.checklists.length).toBe(2);
             })
+            .end(done)
+    });
+});
+
+describe('GET /checklists/id', () => {
+
+    it('should fetch the checklist for the given id', (done) => {
+
+        request(app)
+            .get(`/checklists/${mockChecklists[0]._id.toHexString()}`)
+            .expect(200)
+            .expect((res) => {
+                expect(res.body.checklist.text).toBe(mockChecklists[0].text);
+            })
+            .end(done)
+    });
+
+    it('should return a 404 if checklist not found', (done) => {
+
+        request(app)
+            .get(`/checklists/${new ObjectID().toHexString()}`)
+            .expect(404)
+            .end(done)
+    });
+
+    it('should return a 404 if the given id is not a valid ObjectID', (done) => {
+
+        request(app)
+            .get('/checklists/123')
+            .expect(404)
             .end(done)
     });
 });
