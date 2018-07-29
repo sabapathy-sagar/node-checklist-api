@@ -1,3 +1,4 @@
+require('./config/config');
 const express = require('express');
 const bodyParser = require('body-parser');
 const _ = require('lodash');
@@ -5,6 +6,9 @@ const {ObjectID} = require('mongodb');
 const mongoose = require('./db/mongoose');
 const {Checklist} = require('./models/checklist');
 const {User} = require('./models/user');
+
+//port number on which the app is running
+const port = process.env.PORT;
 
 //create an express application
 const app = express();
@@ -137,8 +141,8 @@ app.patch('/checklists/:id', (req,res) => {
 })
 
 //listen on port 3000
-app.listen(3000, () => {
-    console.log('Started on port 3000');
+app.listen(port, () => {
+    console.log(`Started on ${port}`);
 });
 
 module.exports = {
