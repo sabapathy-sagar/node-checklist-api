@@ -73,6 +73,33 @@ app.get('/checklists/:id', (req,res) => {
 
 });
 
+//DELETE method endpoint to delete a specific chdecklist based on the id provided
+app.delete('/checklists/:id', (req,res) => {
+    const id = req.params.id;
+    //validate the id provided, if invalid send 404 Bad request
+    if(!ObjectID.isValid(id)){
+        res.status(404).send();
+        return;
+    }
+
+    //delete the checklist based on the id from the db
+    Checklist.findByIdAndRemove(id)
+        .then(
+            (checklist) => {
+                //if no checklist exists for the id, send 404 with empty body
+                if(!checklist){
+                   return res.status(404).send();
+                }
+                //if checklist exists, send the fetched checklist back
+                res.send({checklist});
+        })
+        .catch((() => {
+            //if error while fetching the checklist, send status 400 with empty body
+            res.status(400).send();
+        }))
+
+});
+
 //listen on port 3000
 app.listen(3000, () => {
     console.log('Started on port 3000');
