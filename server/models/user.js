@@ -32,7 +32,7 @@ var UserSchema = new mongoose.Schema({
   }]
 });
 
-//override the toJSON method in order not to send the token in the POST response
+//override the instance method toJSON in order not to send the token in the POST response
 UserSchema.methods.toJSON = function () {
   var user = this;
   var userObject = user.toObject();
@@ -40,8 +40,9 @@ UserSchema.methods.toJSON = function () {
   return _.pick(userObject, ['_id', 'email']);
 };
 
-//a new method in the UserSchema to generate token
+//a new instance method in the UserSchema to generate token
 UserSchema.methods.generateAuthToken = function () {
+//instance methods get called with the individual document
   var user = this;
   var access = 'auth';
   var token = jwt.sign({_id: user._id.toHexString(), access}, 'abc123').toString();
@@ -52,6 +53,28 @@ UserSchema.methods.generateAuthToken = function () {
     return token;
   });
 };
+
+//a new model method findByToken to get the token
+UserSchema.statics.findByToken = function(token){
+    //model methods get called with the model 
+    var User = this;
+    var decode;
+    
+    try{
+        decode = jwt.verify(token, 'abc123');
+    } catch(e){
+        //on error return a promise that always rejects
+        return Promise.reject();
+    }
+
+    return User.findOne({
+        '_id': decode._id,
+        'tokens.token': token,
+        'tokens.access': 'auth'
+    });
+
+
+}
 
 var User = mongoose.model('User', UserSchema);
 
