@@ -19,7 +19,7 @@ app.use(bodyParser.json());
 //POST method endpoint for creating checklists
 app.post('/checklists', (req,res) => {
 
-    //a mongoose todo instance to set the text data of the checklist
+    //a mongoose checklist instance to set the text data of the checklist
     const checklist = new Checklist({
         text: req.body.text
     });
@@ -139,6 +139,32 @@ app.patch('/checklists/:id', (req,res) => {
             res.status(400).send();
         });
 })
+
+//POST method endpoint for adding users
+app.post('/users', (req, res) => {
+
+    const body = _.pick(req.body, ['email', 'password']);
+
+    //create a new instance of an User with email and password properties
+    var user = new User(body);
+
+    //save the User data to the db
+    user.save()
+        .then(() => {
+            //generate auth token
+            return user.generateAuthToken()
+        })
+        .then((token) => {
+        //on successful save, send the saved user data as a POST response with token in the header
+        res.header('x-auth',token).send(user);
+        })
+        .catch((e) => {
+            //on saving failed send the error message with a status of 400 in the POST response
+            res.status(400).send(e);
+        })
+        
+}) 
+
 
 //listen on port 3000
 app.listen(port, () => {
