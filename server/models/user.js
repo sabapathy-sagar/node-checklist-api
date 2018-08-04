@@ -78,9 +78,33 @@ UserSchema.statics.findByToken = function(token){
     });
 }
 
+//a new model method to get user data based on email & password (credentials)
+UserSchema.statics.findByCredentials = function(email, password) {
+  var User = this;
+
+  return User.findOne({email})
+    .then((user) => {
+      if(!user){
+        return Promise.reject();
+      }
+
+      return new Promise((resolve, reject) => {
+        //compare if password received from POST is the same as the hashed password stored in the db
+        bcrypt.compare(password, user.password, (err, res) => {
+          if(res){
+            return resolve(user);
+          }
+          return reject();
+        })
+        
+      })
+
+    });
+}
+
 //mongoose middleware to encrypt password before saving it to the db
 UserSchema.pre('save', function(next){
-
+  var user = this;
     //encrypt only the password
     if(user.isModified('password')){
         bcrypt.genSalt(10, (err,salt) => {
