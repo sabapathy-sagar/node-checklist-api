@@ -166,5 +166,44 @@ describe('PATCH /checklists/id', () => {
             })
             .end(done)
     })
+})
 
+describe('POST users/login', () => {
+    it('should login user and return a auth token', (done) => {
+        request(app)
+            .post('/users/login')
+            .send({
+                email: users[1].email,
+                password: users[1].password
+            })
+            .expect(200)
+            .expect((res) => {
+                expect(res.headers['x-auth']).toExist();
+            })
+            .end((err, res) => {
+                if(err){
+                    return done(err);
+                }
+
+                User.findById(users[1]._id).then((user) => {
+                    expect(user.tokens[0]).toInclude({
+                        access: 'auth',
+                        token: res.header['x-auth']
+                    });
+                    done();
+                }).catch((e) => done(e))
+            })
+    })
+
+    it('should reject invalid login', (done) => {
+        request(app)
+            .post('/users/login')
+            .send({
+                email: '1@1.com',
+                password: 'blabla'
+            })
+            .expect(400)
+            .end(done)
+
+    })
 })
