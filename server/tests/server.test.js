@@ -4,26 +4,16 @@ const {ObjectID} = require('mongodb');
 
 const {app} = require('./../server');
 const {Checklist} = require('./../models/checklist');
+const {User} = require('./../models/user');
+const {mockChecklists, populateChecklists, users, populateUsers} = require('./seed/seed');
 
-const mockChecklists = [
-    {
-        _id: new ObjectID(),
-        text: "first checklist"
-    },
-    {
-        _id: new ObjectID(),
-        text: "sec checklist",
-        completed: false
-    }
-]
+//before running any tests, clear the database and then save the mock users in the db
+//beforeEach(populateUsers);
 
-//clear the database and insert the mock checklists before running any tests
-beforeEach((done) => {
-    Checklist.remove().then(() => {
-        Checklist.insertMany(mockChecklists)
-            .then(() => done())
-    });
-})
+//before running any tests, clear the database and insert the mock checklists 
+beforeEach(populateChecklists);
+
+
 
 describe('POST /checklists', () => {
 
