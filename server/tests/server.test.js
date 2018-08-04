@@ -8,7 +8,7 @@ const {User} = require('./../models/user');
 const {mockChecklists, populateChecklists, users, populateUsers} = require('./seed/seed');
 
 //before running any tests, clear the database and then save the mock users in the db
-//beforeEach(populateUsers);
+beforeEach(populateUsers);
 
 //before running any tests, clear the database and insert the mock checklists 
 beforeEach(populateChecklists);

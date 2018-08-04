@@ -174,6 +174,24 @@ app.get('/users/me', authenticate, (req,res) => {
     res.send(req.user);
 })
 
+//POST method to login users
+app.post('/users/login', (req, res) => {
+
+    const body = _.pick(req.body, ['email', 'password']);
+
+    User.findByCredentials(body.email, body.password)
+        .then((user) => {
+            //on successfully finding the user by credentials, generate a token and send it to the user
+            return user.generateAuthToken().then((token) => {
+                res.header('x-auth',token).send(user);
+            })
+        })
+        .catch(() => {
+            //if error while fetching the user, send status 400 with empty body
+            res.status(400).send();
+        })
+})
+
 
 //listen on port 3000
 app.listen(port, () => {
