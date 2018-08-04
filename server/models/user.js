@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const validator = require('validator');
 const jwt = require('jsonwebtoken');
 const _ = require('lodash');
+const bcrypt = require('bcryptjs');
 
 var UserSchema = new mongoose.Schema({
   email: {
@@ -31,6 +32,9 @@ var UserSchema = new mongoose.Schema({
     }
   }]
 });
+
+//when using instance or model methods, do not use arrow functions.
+//Arrow functions do not have access to the other attributes and methods on the object through the 'this' binding
 
 //override the instance method toJSON in order not to send the token in the POST response
 UserSchema.methods.toJSON = function () {
@@ -72,9 +76,25 @@ UserSchema.statics.findByToken = function(token){
         'tokens.token': token,
         'tokens.access': 'auth'
     });
-
-
 }
+
+//mongoose middleware to encrypt password before saving it to the db
+UserSchema.pre('save', function(next){
+
+    //encrypt only the password
+    if(user.isModified('password')){
+        bcrypt.genSalt(10, (err,salt) => {
+            bcrypt.hash(user.password, salt, (err, hash) => {
+                user.password = hash;
+                next();
+            })
+        })
+    } else {
+        //program execution will not continue if next() not called
+        next();
+    }
+
+})
 
 var User = mongoose.model('User', UserSchema);
 
