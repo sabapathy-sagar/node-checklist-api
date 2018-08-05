@@ -58,6 +58,19 @@ UserSchema.methods.generateAuthToken = function () {
   });
 };
 
+//a new instance method in the UserSchema to remove token
+UserSchema.methods.removeToken = function(token){
+  var user = this;
+
+  return user.update({
+    $pull: {
+      tokens: {
+        token
+      }
+    }
+  })
+}
+
 //a new model method findByToken to get the token
 UserSchema.statics.findByToken = function(token){
     //model methods get called with the model 
@@ -117,8 +130,8 @@ UserSchema.pre('save', function(next){
         //program execution will not continue if next() not called
         next();
     }
-
 })
+
 
 var User = mongoose.model('User', UserSchema);
 

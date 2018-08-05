@@ -169,7 +169,7 @@ app.post('/users', (req, res) => {
 }) 
 
 //GET method to get user's data based on the token, which makes use of the
-//authenticate middleware for authenticating the user
+//authenticate middleware for making sure that only authenticted user can access this endpoint
 app.get('/users/me', authenticate, (req,res) => {
     res.send(req.user);
 })
@@ -190,6 +190,17 @@ app.post('/users/login', (req, res) => {
             //if error while fetching the user, send status 400 with empty body
             res.status(400).send();
         })
+})
+
+//DELETE method to logout the user, only authenticated user can use this endpoint
+app.delete('/users/me/token', authenticate, (req,res) => {
+    req.user.removeToken(req.token).then(() => 
+        {   
+            res.send(); 
+        },
+    () => {    
+        res.status(400).send();
+    })
 })
 
 
