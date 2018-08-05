@@ -22,19 +22,27 @@ const users = [
     {
         _id: userTwoId,
         email: 'b@b.com',
-        password: 'xyz1234'
+        password: 'xyz1234',
+        tokens: [
+            {
+                access: 'auth',
+                token: jwt.sign({_id:userTwoId, access:'auth'}, 'abc123').toString()
+            }
+        ]
     }
 ]
 
 const mockChecklists = [
     {
         _id: new ObjectID(),
-        text: "first checklist"
+        text: "first checklist",
+        _creator: userOneId
     },
     {
         _id: new ObjectID(),
         text: "sec checklist",
-        completed: false
+        completed: false,
+        _creator: userTwoId
     }
 ]
 

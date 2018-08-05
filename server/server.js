@@ -19,12 +19,14 @@ const app = express();
 //middleware to use json format for http request body
 app.use(bodyParser.json());
 
-//POST method endpoint for creating checklists
-app.post('/checklists', (req,res) => {
+//POST method endpoint for creating checklists, only authenticted user can access this endpoint
+//note: authenticate middleware gives access to the user and token in the req object
+app.post('/checklists', authenticate,  (req,res) => {
 
     //a mongoose checklist instance to set the text data of the checklist
     const checklist = new Checklist({
-        text: req.body.text
+        text: req.body.text,
+        _creator: req.user._id
     });
 
     //save the checklist text data to mongodb
@@ -40,10 +42,12 @@ app.post('/checklists', (req,res) => {
     })
 });
 
-//GET method endpoint to fetch all the checklists
-app.get('/checklists', (req,res) => {
+//GET method endpoint to fetch all the checklists, only authenticted user can access this endpoint
+app.get('/checklists', authenticate, (req,res) => {
     //fetch all the checklists from the database
-    Checklist.find().then(
+    Checklist.find({
+        _creator: req.user._id
+    }).then(
         (checklists) => {
             //send the fetched checklists as a response
             res.send({checklists});
@@ -55,7 +59,7 @@ app.get('/checklists', (req,res) => {
 });
 
 //GET method endpoint to fetch a specific chdecklist based on the id provided
-app.get('/checklists/:id', (req,res) => {
+app.get('/checklists/:id', authenticate, (req,res) => {
     const id = req.params.id;
     //validate the id provided, if invalid send 404 Bad request
     if(!ObjectID.isValid(id)){
@@ -63,8 +67,11 @@ app.get('/checklists/:id', (req,res) => {
         return;
     }
 
-    //fetch the checklist based on the id from the db
-    Checklist.findById(id)
+    //fetch the checklist based on user id and creator from the db
+    Checklist.findOne({
+        _id: id,
+        _creator: req.user._id
+    })
         .then(
             (checklist) => {
                 //if no checklist exists for the id, send 404 with empty body
@@ -82,7 +89,7 @@ app.get('/checklists/:id', (req,res) => {
 });
 
 //DELETE method endpoint to delete a specific chdecklist based on the id provided
-app.delete('/checklists/:id', (req,res) => {
+app.delete('/checklists/:id', authenticate, (req,res) => {
     const id = req.params.id;
     //validate the id provided, if invalid send 404 Bad request
     if(!ObjectID.isValid(id)){
@@ -90,8 +97,11 @@ app.delete('/checklists/:id', (req,res) => {
         return;
     }
 
-    //delete the checklist based on the id from the db
-    Checklist.findByIdAndRemove(id)
+    //delete the checklist of a user based on the id and token from the db
+    Checklist.findOneAndRemove({
+        _id: id,
+        _creator: req.token
+    })
         .then(
             (checklist) => {
                 //if no checklist exists for the id, send 404 with empty body
@@ -109,7 +119,7 @@ app.delete('/checklists/:id', (req,res) => {
 });
 
 //PATCH method endpoint to update a checklist based on the id provided
-app.patch('/checklists/:id', (req,res) => {
+app.patch('/checklists/:id', authenticate, (req,res) => {
     const id = req.params.id;
 
     //grab the text and completed attributes from the request body
@@ -130,7 +140,10 @@ app.patch('/checklists/:id', (req,res) => {
     }  
 
     //update the checklist with the new values
-    Checklist.findByIdAndUpdate(id, {$set: body}, {new: true})
+    Checklist.findByOneAndUpdate({
+        _id: id,
+        _creator: req.user._id
+    }, {$set: body}, {new: true})
         .then((checklist) => {
             if(!checklist){
                 return res.status(404).send();
